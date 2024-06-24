@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react";
-import { NearContext } from "../context";
+import PropTypes from 'prop-types';
 
+import { NearContext } from "../context";
 import { Ethereum } from "../services/ethereum";
 import { useDebounce } from "../hooks/debounce";
-import PropTypes from 'prop-types';
 
 const Sepolia = 11155111;
 const Eth = new Ethereum('https://rpc2.sepolia.org', Sepolia);
@@ -14,7 +14,7 @@ export function EthereumView({ props: { setStatus, MPC_CONTRACT } }) {
   const [receiver, setReceiver] = useState("0xe0f3B7e68151E9306727104973752A415c2bcbEb");
   const [amount, setAmount] = useState(0.01);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState("request");
+  const [step, setStep] = useState("mint");
   const [signedTransaction, setSignedTransaction] = useState(null);
   const [senderAddress, setSenderAddress] = useState("")
 
@@ -89,19 +89,23 @@ export function EthereumView({ props: { setStatus, MPC_CONTRACT } }) {
           <div className="form-text" id="eth-sender"> {senderAddress} </div>
         </div>
       </div>
-      <div className="row mb-3">
-        <label className="col-sm-2 col-form-label col-form-label-sm">To:</label>
-        <div className="col-sm-10">
-          <input type="text" className="form-control form-control-sm" value={receiver} onChange={(e) => setReceiver(e.target.value)} disabled={loading} />
-        </div>
-      </div>
-      <div className="row mb-3">
-        <label className="col-sm-2 col-form-label col-form-label-sm">Amount:</label>
-        <div className="col-sm-10">
-          <input type="number" className="form-control form-control-sm" value={amount} onChange={(e) => setAmount(e.target.value)} step="0.01" disabled={loading} />
-          <div className="form-text"> Ethereum units </div>
-        </div>
-      </div>
+      {step !== 'mint' &&
+          <>
+            <div className="row mb-3">
+              <label className="col-sm-2 col-form-label col-form-label-sm">To:</label>
+              <div className="col-sm-10">
+                <input type="text" className="form-control form-control-sm" value={receiver} onChange={(e) => setReceiver(e.target.value)} disabled={loading} />
+              </div>
+            </div>
+            <div className="row mb-3">
+              <label className="col-sm-2 col-form-label col-form-label-sm">Amount:</label>
+              <div className="col-sm-10">
+                <input type="number" className="form-control form-control-sm" value={amount} onChange={(e) => setAmount(e.target.value)} step="0.01" disabled={loading} />
+                <div className="form-text"> Ethereum units </div>
+              </div>
+            </div>
+          </>
+      }
 
       <div className="text-center">
         {step === 'request' && <button className="btn btn-primary text-center" onClick={UIChainSignature} disabled={loading}> Request Signature </button>}
@@ -115,5 +119,6 @@ EthereumView.propTypes = {
   props: PropTypes.shape({
     setStatus: PropTypes.func.isRequired,
     MPC_CONTRACT: PropTypes.string.isRequired,
+    NFT_KEY_CONTRACT: PropTypes.string,
   }).isRequired
 };
